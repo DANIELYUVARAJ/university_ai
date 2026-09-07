@@ -1,0 +1,47 @@
+field_name,data_type,sample_pattern,expected_classification,expected_sensitive
+student_id,string,STU_DEMO_001,DIRECT_IDENTIFIER,True
+student_name,string,Demo Student,DIRECT_IDENTIFIER,True
+email,string,student001@example.edu,DIRECT_IDENTIFIER,True
+phone,string,+91-9000000001,DIRECT_IDENTIFIER,True
+mobile_number,string,+91-9000000002,DIRECT_IDENTIFIER,True
+personal_email,string,personal001@example.com,DIRECT_IDENTIFIER,True
+guardian_contact,string,+91-9000000003,DIRECT_IDENTIFIER,True
+student_identifier,string,STU_DEMO_042,DIRECT_IDENTIFIER,True
+date_of_birth,date,1999-04-17,QUASI_IDENTIFIER,True
+birth_year,number,1999,QUASI_IDENTIFIER,True
+address,string,"123 Demo Street, City",DIRECT_IDENTIFIER,True
+postal_code,string,400001,DIRECT_IDENTIFIER,True
+graduation_year,number,2023,QUASI_IDENTIFIER,True
+attendance_percentage,number,92,ACADEMIC_DATA,True
+absence_count,number,3,ACADEMIC_DATA,True
+exam_score,number,78,ACADEMIC_DATA,True
+internal_mark,number,45,ACADEMIC_DATA,True
+grade,string,A+,ACADEMIC_DATA,True
+course_code,string,CS401,NON_SENSITIVE,False
+course_name,string,Data Structures,NON_SENSITIVE,False
+department,string,Computer Science,NON_SENSITIVE,False
+semester,number,5,NON_SENSITIVE,False
+placement_status,string,Placed,PLACEMENT_DATA,True
+placement_package,number,850000,PLACEMENT_DATA,True
+salary,number,750000,SENSITIVE_ATTRIBUTE,True
+company_code,string,COMP_001,NON_SENSITIVE,False
+candidate_reference,string,CAND_REF_001,DIRECT_IDENTIFIER,True
+offer_status,string,Accepted,PLACEMENT_DATA,True
+course_count,number,6,NON_SENSITIVE,False
+semester_count,number,8,NON_SENSITIVE,False
+classroom_capacity,number,60,NON_SENSITIVE,False
+academic_year,string,2023-24,NON_SENSITIVE,False
+course_duration,number,4,NON_SENSITIVE,False
+department_code,string,CS,NON_SENSITIVE,False
+contact,string,student001@example.edu,DIRECT_IDENTIFIER,True
+identifier,string,STU_DEMO_007,DIRECT_IDENTIFIER,True
+personal_contact,string,+91-9000000004,DIRECT_IDENTIFIER,True
+candidate_id,string,CAND_DEMO_001,DIRECT_IDENTIFIER,True
+student_reference,string,REF_DEMO_099,DIRECT_IDENTIFIER,True
+email_template_id,string,TPL_001,NON_SENSITIVE,False
+email_template_name,string,Welcome Email,NON_SENSITIVE,False
+phone_model,string,Pixel 7,NON_SENSITIVE,False
+student_count,number,120,NON_SENSITIVE,False
+salary_range_code,string,RANGE_L3,NON_SENSITIVE,False
+address_type,string,Permanent,NON_SENSITIVE,False
+contact_type,string,Primary,NON_SENSITIVE,False

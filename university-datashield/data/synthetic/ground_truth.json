@@ -1,0 +1,232 @@
+[
+  {
+    "field": "student_id",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "student_name",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "email",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "phone",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "mobile_number",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "personal_email",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "guardian_contact",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "student_identifier",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "date_of_birth",
+    "expected_sensitive": true,
+    "expected_classification": "QUASI_IDENTIFIER"
+  },
+  {
+    "field": "birth_year",
+    "expected_sensitive": true,
+    "expected_classification": "QUASI_IDENTIFIER"
+  },
+  {
+    "field": "address",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "postal_code",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "graduation_year",
+    "expected_sensitive": true,
+    "expected_classification": "QUASI_IDENTIFIER"
+  },
+  {
+    "field": "attendance_percentage",
+    "expected_sensitive": true,
+    "expected_classification": "ACADEMIC_DATA"
+  },
+  {
+    "field": "absence_count",
+    "expected_sensitive": true,
+    "expected_classification": "ACADEMIC_DATA"
+  },
+  {
+    "field": "exam_score",
+    "expected_sensitive": true,
+    "expected_classification": "ACADEMIC_DATA"
+  },
+  {
+    "field": "internal_mark",
+    "expected_sensitive": true,
+    "expected_classification": "ACADEMIC_DATA"
+  },
+  {
+    "field": "grade",
+    "expected_sensitive": true,
+    "expected_classification": "ACADEMIC_DATA"
+  },
+  {
+    "field": "course_code",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "course_name",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "department",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "semester",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "placement_status",
+    "expected_sensitive": true,
+    "expected_classification": "PLACEMENT_DATA"
+  },
+  {
+    "field": "placement_package",
+    "expected_sensitive": true,
+    "expected_classification": "PLACEMENT_DATA"
+  },
+  {
+    "field": "salary",
+    "expected_sensitive": true,
+    "expected_classification": "SENSITIVE_ATTRIBUTE"
+  },
+  {
+    "field": "company_code",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "candidate_reference",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "offer_status",
+    "expected_sensitive": true,
+    "expected_classification": "PLACEMENT_DATA"
+  },
+  {
+    "field": "course_count",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "semester_count",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "classroom_capacity",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "academic_year",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "course_duration",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "department_code",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "contact",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "identifier",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "personal_contact",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "candidate_id",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "student_reference",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "email_template_id",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "email_template_name",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "phone_model",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "student_count",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "salary_range_code",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "address_type",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "contact_type",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  }
+]

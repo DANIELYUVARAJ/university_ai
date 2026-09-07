@@ -1,0 +1,408 @@
+{
+  "timestamp": "2026-09-07T10:38:03.182930Z",
+  "overall_status": "PASS",
+  "scenarios_passed": 14,
+  "scenarios_total": 14,
+  "metrics": {
+    "total_scenarios": 14,
+    "passed_scenarios": 14,
+    "failed_scenarios": 0,
+    "unsafe_publication_prevention_rate": 1.0,
+    "unauthorized_block_rate": 1.0,
+    "audit_coverage_rate": 1.0,
+    "rollback_recovery_rate": 1.0,
+    "false_block_rate": 0.0,
+    "safe_publication_rate": 1.0,
+    "audit_integrity_detection_rate": 1.0,
+    "detection_precision": 1.0,
+    "detection_recall": 0.75,
+    "detection_f1": 0.8571,
+    "detection_accuracy": 0.8478
+  },
+  "scenarios": [
+    {
+      "scenario_id": "SEC-01",
+      "name": "Compliant Publication Approval",
+      "category": "PUBLICATION_SAFETY",
+      "description": "Legitimate analytical dataset with all sensitive fields correctly protected according to policy.",
+      "synthetic_fields": [
+        {
+          "name": "student_id",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "HASH",
+          "sample_value": "STU_DEMO_001"
+        },
+        {
+          "name": "email",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "MASK",
+          "sample_value": "student001@example.edu"
+        },
+        {
+          "name": "date_of_birth",
+          "classification": "QUASI_IDENTIFIER",
+          "actual_action": "GENERALIZE",
+          "sample_value": "2002-04-15"
+        },
+        {
+          "name": "major",
+          "classification": "NON_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "Data Science"
+        }
+      ],
+      "attempted_action": "Publish dataset to analytical warehouse by authorized ANALYST.",
+      "expected_decision": "ALLOW",
+      "actual_decision": "ALLOW",
+      "status": "PASS",
+      "severity": "LOW",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION",
+      "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
+      "execution_time_ms": 12.08
+    },
+    {
+      "scenario_id": "SEC-02",
+      "name": "Unmasked Direct Identifier Block",
+      "category": "PUBLICATION_SAFETY",
+      "description": "Attempt to publish dataset with unprotected phone number (actual: NONE, required: MASK).",
+      "synthetic_fields": [
+        {
+          "name": "phone",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "NONE",
+          "sample_value": "+91-9000000001"
+        },
+        {
+          "name": "department",
+          "classification": "NON_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "Engineering"
+        }
+      ],
+      "attempted_action": "Publish dataset containing raw direct identifier without protection.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 13.27
+    },
+    {
+      "scenario_id": "SEC-03",
+      "name": "Unauthorized Role Publication Gate Denial",
+      "category": "ACCESS_CONTROL",
+      "description": "Role without PUBLISH permission (FACULTY) attempts publication to external destination.",
+      "synthetic_fields": [
+        {
+          "name": "student_id",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "HASH",
+          "sample_value": "STU_DEMO_002"
+        }
+      ],
+      "attempted_action": "Publication attempt by FACULTY role.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "ACCESS_DENIAL",
+      "notes": "Gate evaluated status: UNAUTHORIZED",
+      "execution_time_ms": 13.35
+    },
+    {
+      "scenario_id": "SEC-04",
+      "name": "Client-Side Flag Injection / Bypass Attempt",
+      "category": "BYPASS_RESISTANCE",
+      "description": "Request injects forged approval flags (approved=True, safe=True, status=PASS) while raw personal name is unprotected.",
+      "synthetic_fields": [
+        {
+          "name": "student_name",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "NONE",
+          "sample_value": "Demo Student"
+        }
+      ],
+      "attempted_action": "Adversarial publication check with forged client-side compliance metadata.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 14.29
+    },
+    {
+      "scenario_id": "SEC-05",
+      "name": "Wrong Masking Transformation Mismatch",
+      "category": "MASKING_COMPLIANCE",
+      "description": "Email address requires MASK protection; transformation applied is GENERALIZE (insufficient protection).",
+      "synthetic_fields": [
+        {
+          "name": "email",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "GENERALIZE",
+          "sample_value": "student@example.edu"
+        }
+      ],
+      "attempted_action": "Publish with mismatched transformation that fails specific required policy.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 13.1
+    },
+    {
+      "scenario_id": "SEC-06",
+      "name": "Missing Policy Fail-Closed Behavior",
+      "category": "FAIL_CLOSED_BEHAVIOR",
+      "description": "Sensitive field with undefined or conflicting classification; system must fail closed rather than publish.",
+      "synthetic_fields": [
+        {
+          "name": "restricted_health_biometric",
+          "classification": "UNKNOWN_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "BIO_SYNTH_999"
+        }
+      ],
+      "attempted_action": "Validate and publish field with undefined classification policy.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 11.84
+    },
+    {
+      "scenario_id": "SEC-07",
+      "name": "Ambiguous Field Name Multi-Signal Resolution",
+      "category": "PUBLICATION_SAFETY",
+      "description": "Field named 'contact' (ambiguous name) with phone number regex pattern. Engine uses value pattern to catch sensitive data.",
+      "synthetic_fields": [
+        {
+          "name": "contact",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "NONE",
+          "sample_value": "+1-555-0199"
+        }
+      ],
+      "attempted_action": "Discovery and unmasked publication of ambiguous contact field.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 12.65
+    },
+    {
+      "scenario_id": "SEC-08",
+      "name": "False-Positive Trap Resistance",
+      "category": "FALSE_POSITIVE_RESISTANCE",
+      "description": "Legitimate non-sensitive analytical aggregates (email_template_id, course_code, student_count) are not falsely blocked.",
+      "synthetic_fields": [
+        {
+          "name": "email_template_id",
+          "classification": "NON_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "TMPL_ORIENTATION_2026"
+        },
+        {
+          "name": "course_code",
+          "classification": "NON_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "CS101"
+        },
+        {
+          "name": "student_count",
+          "classification": "NON_SENSITIVE",
+          "actual_action": "NONE",
+          "sample_value": "45"
+        }
+      ],
+      "attempted_action": "Publish analytical summary containing aggregate and template columns.",
+      "expected_decision": "ALLOW",
+      "actual_decision": "ALLOW",
+      "status": "PASS",
+      "severity": "LOW",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION",
+      "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
+      "execution_time_ms": 12.85
+    },
+    {
+      "scenario_id": "SEC-09",
+      "name": "Tampered Audit Log Cryptographic Detection",
+      "category": "AUDIT_INTEGRITY",
+      "description": "Audit trail record has forged metadata or modified event hash; integrity verification catches tampering.",
+      "synthetic_fields": [],
+      "attempted_action": "Simulate modification of historical audit record and run GET /audit/integrity.",
+      "expected_decision": "COMPROMISED",
+      "actual_decision": "COMPROMISED",
+      "status": "PASS",
+      "severity": "CRITICAL",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "AUDIT_INTEGRITY",
+      "notes": "Integrity engine caught tampering: Hash mismatch at event #1055: computed 89ed85a4b9d77f2c031c4e9244c355afbf88d7ed83bbf926071219c521773cc7, recorded 0000000000000000000000000000000000000000000000000000000000000000",
+      "execution_time_ms": 44.2
+    },
+    {
+      "scenario_id": "SEC-10",
+      "name": "Bad Policy Rollback & Safe Revalidation",
+      "category": "POLICY_LIFECYCLE",
+      "description": "Unsafe policy change is proposed; Security Admin rolls back to baseline v1.0 snapshot; automatic revalidation runs.",
+      "synthetic_fields": [],
+      "attempted_action": "Execute rollback of degraded policy snapshot with automated post-rollback validation.",
+      "expected_decision": "ALLOW",
+      "actual_decision": "ALLOW",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "POLICY_ROLLBACK",
+      "notes": "Active version restored to v1.10-rollback matching v1.8-rollback.",
+      "execution_time_ms": 135.93
+    },
+    {
+      "scenario_id": "SEC-11",
+      "name": "Malformed Value on Sensitive Field (Name Precedence)",
+      "category": "FAIL_CLOSED_BEHAVIOR",
+      "description": "Phone field with non-standard value ('not-a-phone'); system relies on field name rule rather than silently treating as safe.",
+      "synthetic_fields": [
+        {
+          "name": "phone",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "NONE",
+          "sample_value": "not-a-phone"
+        }
+      ],
+      "attempted_action": "Attempt to bypass discovery using corrupted synthetic phone string.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 12.57
+    },
+    {
+      "scenario_id": "SEC-12",
+      "name": "Null/Empty Value on Direct Identifier",
+      "category": "FAIL_CLOSED_BEHAVIOR",
+      "description": "Email column with null/empty sample values; schema sensitivity still requires protection if published.",
+      "synthetic_fields": [
+        {
+          "name": "email",
+          "classification": "DIRECT_IDENTIFIER",
+          "actual_action": "NONE",
+          "sample_value": null
+        }
+      ],
+      "attempted_action": "Attempt to publish unmasked email column with null sample values.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "PUBLICATION_CHECK",
+      "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
+      "execution_time_ms": 12.31
+    },
+    {
+      "scenario_id": "SEC-13",
+      "name": "API-Level Privilege Escalation Bypass on Rollback",
+      "category": "ACCESS_CONTROL",
+      "description": "DATA_ENGINEER attempts direct POST /policies/rollback; backend rejects with 403 GOVERNANCE_ROLE_REQUIRED.",
+      "synthetic_fields": [],
+      "attempted_action": "Invoke policy rollback with non-admin actor role.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "ACCESS_DENIAL",
+      "notes": "Backend rejected unauthorized rollback with 403 GOVERNANCE_ROLE_REQUIRED",
+      "execution_time_ms": 0.03
+    },
+    {
+      "scenario_id": "SEC-14",
+      "name": "Self-Approval Policy Change Block",
+      "category": "ACCESS_CONTROL",
+      "description": "Proposer attempts to approve their own policy proposal; backend rejects with 409 SELF_APPROVAL_BLOCKED.",
+      "synthetic_fields": [],
+      "attempted_action": "Attempt self-approval of change request.",
+      "expected_decision": "BLOCK",
+      "actual_decision": "BLOCK",
+      "status": "PASS",
+      "severity": "HIGH",
+      "root_cause": null,
+      "remediation": null,
+      "audit_event": "POLICY_CHANGE_PROPOSED",
+      "notes": "Backend rejected self-approval with 409 SELF_APPROVAL_BLOCKED",
+      "execution_time_ms": 38.81
+    }
+  ],
+  "baseline_comparison": [
+    {
+      "metric": "Detection Precision",
+      "baseline_value": "74.1%",
+      "datashield_value": "100.0%",
+      "interpretation": "DataShield semantic + regex rules avoid baseline keyword false-positive traps."
+    },
+    {
+      "metric": "Detection Recall",
+      "baseline_value": "71.4%",
+      "datashield_value": "75.0%",
+      "interpretation": "Multi-signal detector discovers sensitive fields missed by substring keywords."
+    },
+    {
+      "metric": "Detection F1 Score",
+      "baseline_value": "72.7%",
+      "datashield_value": "85.7%",
+      "interpretation": "Harmonic mean of precision and recall demonstrates significant intelligence uplift."
+    },
+    {
+      "metric": "Detection Accuracy",
+      "baseline_value": "67.4%",
+      "datashield_value": "84.8%",
+      "interpretation": "Overall classification accuracy across synthetic validation dataset."
+    },
+    {
+      "metric": "Unsafe Publication Prevention",
+      "baseline_value": "N/A (Detection only \u2014 no publication gate)",
+      "datashield_value": "100.0% (Default Deny Gate)",
+      "interpretation": "Baseline is an un-gated classifier; DataShield provides authoritative backend gate enforcement."
+    },
+    {
+      "metric": "Audit & Governance Layer",
+      "baseline_value": "None",
+      "datashield_value": "SHA-256 Chained Immutable Audit Trail",
+      "interpretation": "Complete governance lifecycle with approval, versioning, and safe rollback."
+    }
+  ],
+  "error_analysis": [],
+  "privacy_check_passed": true
+}
