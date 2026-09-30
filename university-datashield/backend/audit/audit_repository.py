@@ -6,6 +6,7 @@ Repository for immutable, append-only audit trail with SHA-256 hash chaining.
 from __future__ import annotations
 import json
 import hashlib
+import asyncio
 from datetime import datetime
 from typing import List, Optional, Tuple
 
@@ -39,91 +40,101 @@ def compute_event_hash(
 
 
 class AuditRepository:
-    @staticmethod
-    async def append_event(event: AuditEventInput) -> AuditEventRecord:
+    _append_lock: Optional[asyncio.Lock] = None
+
+    @classmethod
+    def _get_lock(cls) -> asyncio.Lock:
+        if cls._append_lock is None:
+            cls._append_lock = asyncio.Lock()
+        return cls._append_lock
+
+    @classmethod
+    async def append_event(cls, event: AuditEventInput) -> AuditEventRecord:
         """
         Append an audit event with SHA-256 hash chaining.
         Append-only guarantee: Events cannot be modified once written.
+        Protected by asyncio.Lock to guarantee hash chain serialization under concurrent pipelines.
         """
-        timestamp = datetime.utcnow().isoformat() + "Z"
-        metadata_str = json.dumps(event.metadata_json or {}, sort_keys=True)
-        actor_id = event.actor_id or "system"
-        dataset = event.dataset or ""
-        field_name = event.field_name or ""
-        reason = event.reason or ""
-        policy_version = event.policy_version or "v1.0"
-        change_id = event.change_id or ""
+        async with cls._get_lock():
+            timestamp = datetime.utcnow().isoformat() + "Z"
+            metadata_str = json.dumps(event.metadata_json or {}, sort_keys=True)
+            actor_id = event.actor_id or "system"
+            dataset = event.dataset or ""
+            field_name = event.field_name or ""
+            reason = event.reason or ""
+            policy_version = event.policy_version or "v1.0"
+            change_id = event.change_id or ""
 
-        db = await get_db()
-        try:
-            # Get latest event hash
-            cursor = await db.execute(
-                "SELECT event_hash FROM audit_events ORDER BY id DESC LIMIT 1"
-            )
-            row = await cursor.fetchone()
-            previous_hash = row[0] if row else GENESIS_HASH
+            db = await get_db()
+            try:
+                # Get latest event hash
+                cursor = await db.execute(
+                    "SELECT event_hash FROM audit_events ORDER BY id DESC LIMIT 1"
+                )
+                row = await cursor.fetchone()
+                previous_hash = row[0] if row else GENESIS_HASH
 
-            # Compute current event hash
-            event_hash = compute_event_hash(
-                previous_hash=previous_hash,
-                timestamp=timestamp,
-                actor_role=event.actor_role,
-                actor_id=actor_id,
-                action=event.action.value,
-                dataset=dataset,
-                field_name=field_name,
-                result=event.result,
-                reason=reason,
-                policy_version=policy_version,
-                change_id=change_id,
-                metadata_str=metadata_str,
-            )
+                # Compute current event hash
+                event_hash = compute_event_hash(
+                    previous_hash=previous_hash,
+                    timestamp=timestamp,
+                    actor_role=event.actor_role,
+                    actor_id=actor_id,
+                    action=event.action.value,
+                    dataset=dataset,
+                    field_name=field_name,
+                    result=event.result,
+                    reason=reason,
+                    policy_version=policy_version,
+                    change_id=change_id,
+                    metadata_str=metadata_str,
+                )
 
-            insert_cur = await db.execute(
-                """
-                INSERT INTO audit_events (
-                    timestamp, actor_role, actor_id, action, dataset,
-                    field_name, result, reason, policy_version, change_id,
-                    metadata_json, previous_hash, event_hash
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    timestamp,
-                    event.actor_role,
-                    actor_id,
-                    event.action.value,
-                    dataset,
-                    field_name,
-                    event.result,
-                    reason,
-                    policy_version,
-                    change_id,
-                    metadata_str,
-                    previous_hash,
-                    event_hash,
-                ),
-            )
-            await db.commit()
-            event_id = insert_cur.lastrowid
+                insert_cur = await db.execute(
+                    """
+                    INSERT INTO audit_events (
+                        timestamp, actor_role, actor_id, action, dataset,
+                        field_name, result, reason, policy_version, change_id,
+                        metadata_json, previous_hash, event_hash
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        timestamp,
+                        event.actor_role,
+                        actor_id,
+                        event.action.value,
+                        dataset,
+                        field_name,
+                        event.result,
+                        reason,
+                        policy_version,
+                        change_id,
+                        metadata_str,
+                        previous_hash,
+                        event_hash,
+                    ),
+                )
+                await db.commit()
+                event_id = insert_cur.lastrowid
 
-            return AuditEventRecord(
-                id=event_id,
-                timestamp=timestamp,
-                actor_role=event.actor_role,
-                actor_id=actor_id,
-                action=event.action,
-                dataset=dataset if dataset else None,
-                field_name=field_name if field_name else None,
-                result=event.result,
-                reason=reason if reason else None,
-                policy_version=policy_version if policy_version else None,
-                change_id=change_id if change_id else None,
-                metadata_json=event.metadata_json,
-                previous_hash=previous_hash,
-                event_hash=event_hash,
-            )
-        finally:
-            await db.close()
+                return AuditEventRecord(
+                    id=event_id,
+                    timestamp=timestamp,
+                    actor_role=event.actor_role,
+                    actor_id=actor_id,
+                    action=event.action,
+                    dataset=dataset if dataset else None,
+                    field_name=field_name if field_name else None,
+                    result=event.result,
+                    reason=reason if reason else None,
+                    policy_version=policy_version if policy_version else None,
+                    change_id=change_id if change_id else None,
+                    metadata_json=event.metadata_json,
+                    previous_hash=previous_hash,
+                    event_hash=event_hash,
+                )
+            finally:
+                await db.close()
 
     @staticmethod
     async def get_events(filters: Optional[AuditFilterParams] = None) -> List[AuditEventRecord]:

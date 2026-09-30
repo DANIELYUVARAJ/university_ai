@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-07T10:38:03.182930Z",
+  "timestamp": "2026-09-29T10:30:01.925790Z",
   "overall_status": "PASS",
   "scenarios_passed": 14,
   "scenarios_total": 14,
@@ -15,9 +15,9 @@
     "safe_publication_rate": 1.0,
     "audit_integrity_detection_rate": 1.0,
     "detection_precision": 1.0,
-    "detection_recall": 0.75,
-    "detection_f1": 0.8571,
-    "detection_accuracy": 0.8478
+    "detection_recall": 1.0,
+    "detection_f1": 1.0,
+    "detection_accuracy": 1.0
   },
   "scenarios": [
     {
@@ -60,7 +60,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION",
       "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
-      "execution_time_ms": 12.08
+      "execution_time_ms": 20.87
     },
     {
       "scenario_id": "SEC-02",
@@ -90,7 +90,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 13.27
+      "execution_time_ms": 10.82
     },
     {
       "scenario_id": "SEC-03",
@@ -114,7 +114,7 @@
       "remediation": null,
       "audit_event": "ACCESS_DENIAL",
       "notes": "Gate evaluated status: UNAUTHORIZED",
-      "execution_time_ms": 13.35
+      "execution_time_ms": 9.93
     },
     {
       "scenario_id": "SEC-04",
@@ -138,7 +138,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 14.29
+      "execution_time_ms": 10.28
     },
     {
       "scenario_id": "SEC-05",
@@ -162,7 +162,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 13.1
+      "execution_time_ms": 14.29
     },
     {
       "scenario_id": "SEC-06",
@@ -186,7 +186,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 11.84
+      "execution_time_ms": 12.49
     },
     {
       "scenario_id": "SEC-07",
@@ -210,7 +210,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 12.65
+      "execution_time_ms": 8.76
     },
     {
       "scenario_id": "SEC-08",
@@ -246,7 +246,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION",
       "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
-      "execution_time_ms": 12.85
+      "execution_time_ms": 11.41
     },
     {
       "scenario_id": "SEC-09",
@@ -262,8 +262,8 @@
       "root_cause": null,
       "remediation": null,
       "audit_event": "AUDIT_INTEGRITY",
-      "notes": "Integrity engine caught tampering: Hash mismatch at event #1055: computed 89ed85a4b9d77f2c031c4e9244c355afbf88d7ed83bbf926071219c521773cc7, recorded 0000000000000000000000000000000000000000000000000000000000000000",
-      "execution_time_ms": 44.2
+      "notes": "Integrity engine caught tampering: Hash mismatch at event #3215: computed bc691e2755325f1e9fd488bee1c467bfd06f14ca3eb5e90eb1e618e8de2d8839, recorded 0000000000000000000000000000000000000000000000000000000000000000",
+      "execution_time_ms": 60.95
     },
     {
       "scenario_id": "SEC-10",
@@ -279,8 +279,8 @@
       "root_cause": null,
       "remediation": null,
       "audit_event": "POLICY_ROLLBACK",
-      "notes": "Active version restored to v1.10-rollback matching v1.8-rollback.",
-      "execution_time_ms": 135.93
+      "notes": "Active version restored to v1.6-rollback matching v1.4-rollback.",
+      "execution_time_ms": 120.15
     },
     {
       "scenario_id": "SEC-11",
@@ -304,7 +304,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 12.57
+      "execution_time_ms": 17.88
     },
     {
       "scenario_id": "SEC-12",
@@ -328,7 +328,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 12.31
+      "execution_time_ms": 10.83
     },
     {
       "scenario_id": "SEC-13",
@@ -362,32 +362,32 @@
       "remediation": null,
       "audit_event": "POLICY_CHANGE_PROPOSED",
       "notes": "Backend rejected self-approval with 409 SELF_APPROVAL_BLOCKED",
-      "execution_time_ms": 38.81
+      "execution_time_ms": 40.66
     }
   ],
   "baseline_comparison": [
     {
       "metric": "Detection Precision",
-      "baseline_value": "74.1%",
+      "baseline_value": "75.0%",
       "datashield_value": "100.0%",
       "interpretation": "DataShield semantic + regex rules avoid baseline keyword false-positive traps."
     },
     {
       "metric": "Detection Recall",
-      "baseline_value": "71.4%",
-      "datashield_value": "75.0%",
+      "baseline_value": "70.0%",
+      "datashield_value": "100.0%",
       "interpretation": "Multi-signal detector discovers sensitive fields missed by substring keywords."
     },
     {
       "metric": "Detection F1 Score",
-      "baseline_value": "72.7%",
-      "datashield_value": "85.7%",
+      "baseline_value": "72.4%",
+      "datashield_value": "100.0%",
       "interpretation": "Harmonic mean of precision and recall demonstrates significant intelligence uplift."
     },
     {
       "metric": "Detection Accuracy",
-      "baseline_value": "67.4%",
-      "datashield_value": "84.8%",
+      "baseline_value": "68.0%",
+      "datashield_value": "100.0%",
       "interpretation": "Overall classification accuracy across synthetic validation dataset."
     },
     {

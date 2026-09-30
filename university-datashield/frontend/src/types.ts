@@ -43,6 +43,27 @@ export interface SignalBreakdown {
   pattern_match: boolean
   data_type_match: boolean
   semantic_match: boolean
+  context_match?: boolean
+}
+
+export type ConfidenceLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'REVIEW'
+export type AmbiguityStatus = 'CLEAR' | 'REVIEW'
+export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+export type PublicationReadiness = 'READY' | 'NEEDS_PROTECTION' | 'BLOCKED'
+
+export interface DatasetRiskSummary {
+  risk_score: number
+  risk_level: RiskLevel
+  publication_readiness: PublicationReadiness
+  direct_identifiers_count: number
+  quasi_identifiers_count: number
+  sensitive_attributes_count: number
+  academic_data_count: number
+  placement_data_count: number
+  non_sensitive_count: number
+  review_fields_count: number
+  risk_factors: string[]
+  disclaimer: string
 }
 
 export interface FieldResult {
@@ -53,6 +74,11 @@ export interface FieldResult {
   confidence_band: ConfidenceBand
   signals: SignalBreakdown
   reasons: string[]
+  normalized_name?: string
+  confidence_level?: ConfidenceLevel
+  ambiguity_status?: AmbiguityStatus
+  contextual_signals?: string[]
+  recommendation?: string
 }
 
 export interface ScanResponse {
@@ -61,6 +87,8 @@ export interface ScanResponse {
   fields_scanned: number
   sensitive_count: number
   results: FieldResult[]
+  dataset_risk?: DatasetRiskSummary
+  publication_readiness?: string
 }
 
 // ── Phase 3: Evaluation & Baseline Types ─────────────────────────────────────
@@ -468,3 +496,114 @@ export interface DemoResetResponse {
   integrity_status: string
   message: string
 }
+
+// ── Phase 10: Analytical Pipeline Integration Types ─────────────────────────
+
+export type PipelineState =
+  | 'CREATED'
+  | 'SCANNING'
+  | 'DETECTED'
+  | 'VALIDATING_POLICY'
+  | 'VALIDATING_ACCESS'
+  | 'READY'
+  | 'BLOCKED'
+  | 'PUBLISHED'
+  | 'FAILED'
+
+export interface PipelineViolation {
+  field: string
+  classification: string
+  required_action: string
+  actual_action: string
+  reason: string
+}
+
+export interface PipelineRecommendation {
+  field: string
+  recommended_action: string
+  reason: string
+  preview?: string
+}
+
+export interface PipelineMaskingPreviewItem {
+  field: string
+  classification: string
+  required_policy: string
+  original_sample_type: string
+  preview: string
+}
+
+export interface PipelineValidateResponse {
+  pipeline_id: string
+  execution_id: string
+  dataset_name: string
+  status: PipelineState
+  decision: 'ALLOW' | 'BLOCK'
+  detection_status: string
+  policy_status: string
+  authorization_status: string
+  risk_level: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL'
+  risk_score: number
+  sensitive_fields: string[]
+  policy_violations: PipelineViolation[]
+  recommended_actions: PipelineRecommendation[]
+  masking_previews: PipelineMaskingPreviewItem[]
+  audit_reference?: string
+  policy_version: string
+  role: string
+  target_destination: string
+  message: string
+  created_at: string
+  completed_at?: string
+}
+
+export interface PipelineRunRecord {
+  id: number
+  pipeline_id: string
+  execution_id: string
+  dataset_name: string
+  format: string
+  status: PipelineState
+  risk_level: string
+  risk_score: number
+  fields_count: number
+  sensitive_count: number
+  violations_count: number
+  decision: 'ALLOW' | 'BLOCK'
+  role: string
+  policy_version: string
+  target_destination: string
+  summary: Record<string, any>
+  report_markdown?: string
+  audit_reference?: string
+  created_at: string
+  completed_at?: string
+}
+
+export interface BatchSummary {
+  batch_id: string
+  total_datasets: number
+  passed: number
+  blocked: number
+  failed: number
+  review_required: number
+  overall_decision: 'ALLOW' | 'BLOCK'
+  fail_closed_triggered: boolean
+}
+
+export interface PipelineBatchResponse {
+  batch_id: string
+  summary: BatchSummary
+  results: PipelineValidateResponse[]
+}
+
+export interface PipelineReportResponse {
+  pipeline_id: string
+  execution_id: string
+  dataset_name: string
+  status: string
+  decision: string
+  summary: Record<string, any>
+  markdown_report: string
+}
+

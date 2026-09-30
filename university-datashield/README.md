@@ -175,26 +175,44 @@ python backend/demo_final_verification.py
 | `/policies/approve` | POST | Security Admin approval (enforces no self-approval) |
 | `/policies/rollback` | POST | Safe rollback with automatic post-revalidation |
 | `/security-validation/results` | GET | Run 14-scenario adversarial failure suite |
+| `/pipeline/validate` | POST | Phase 10: Ingest & validate analytical pipeline dataset |
+| `/pipeline/preview` | POST | Phase 10: Preview synthetic masking transformations |
+| `/pipeline/publish` | POST | Phase 10: Fail-closed publication gate execution |
+| `/pipeline/batch` | POST | Phase 10: Fail-closed multi-dataset batch validation |
+| `/pipeline/runs` | GET | Phase 10: Query pipeline validation ledger |
+| `/pipeline/{id}/report` | GET | Phase 10: Machine- & human-readable markdown verification report |
+| `/ready` | GET | Phase 11: Production orchestration readiness probe |
+| `/auth/token` | POST | Phase 11: Issue signed OAuth2/OIDC JWT access token |
+| `/auth/me` | GET | Phase 11: Authenticated identity and resolved role |
+| `/pipeline/jobs/submit` | POST | Phase 11: Asynchronous worker queue submission |
+| `/pipeline/jobs/{id}` | GET | Phase 11: Check background job status and state machine |
+| `/pipeline/jobs/{id}/retry`| POST | Phase 11: Safe retry recovery (fail-closed security preserved) |
+| `/pipeline/worker/stats` | GET | Phase 11: Background worker queue telemetry |
+| `/pipeline/destination/publish` | POST | Phase 11: Publish validated dataset to warehouse (ALLOW only) |
 
 ---
 
 ## 12. Honest Limitations
 
-- **Simulated Persona Switcher**: Prototype role selection uses demo headers for easy walkthroughs. Production requires an enterprise IdP (SAML 2.0 / OIDC) and signed JWTs.
-- **Single-Node SQLite**: Designed for local prototyping; multi-datacenter university deployments require clustered databases.
-- **Database Administrator Boundary**: An adversary with root file-level access who recomputes hashes from the genesis record forward requires external timestamping authorities.
-- **Transformation-Based Masking**: Masking meets standard university release protocols but does not provide mathematical differential privacy against high-dimensional linkage attacks.
+- **Simulated Identity Support**: While Phase 11 introduces a complete OAuth2/OIDC JWT validation architecture with token issuance, issuer/audience/signature checking, and role resolution, local demonstration mode retains the demo persona switcher (`AUTH_ENABLED=false`). In production mode (`AUTH_ENABLED=true`), Bearer tokens are mandatory.
+- **Worker Queue Infrastructure**: Phase 11 provides a tested in-process asynchronous worker queue with safe retries. Multi-node clusters should connect a distributed broker (e.g. Celery/Redis).
+- **Destination Connectors**: The `MockWarehouseDestination` is queryable and verified; cloud connectors (`SnowflakeDestination`, `BigQueryDestination`, `DatabricksDestination`) are architectural interfaces requiring external cloud credentials.
+- **Single-Node SQLite vs PostgreSQL**: Phase 11 introduces the `DatabaseAdapter` interface supporting both SQLite and PostgreSQL.
 
-See [docs/limitations.md](docs/limitations.md) for complete disclosures.
+See [docs/limitations.md](docs/limitations.md) and [docs/phase11-production-hardening.md](docs/phase11-production-hardening.md) for complete disclosures.
 
 ---
 
 ## 13. Test Results & Build Status
 
 ```text
-Automated Pytest Suite:    179 / 179 passed (pytest tests/ -v in 5.28s)
-Frontend Production Build: Clean (tsc -b && vite build in 1.21s, 0 errors)
-Phase 8 Status:            COMPLETE (Evaluator Ready)
+Automated Pytest Suite:    270 / 270 passed (pytest tests/ -q in 7.28s)
+Phase 11 New Tests:        29 / 29 passed (tests/test_phase11_production_security.py)
+Phase 10 Tests:            22 / 22 passed (tests/test_phase10_pipeline.py)
+Frontend Production Build: Clean (tsc -b && vite build in 1.31s, 0 errors)
+Final Verification:        11 / 11 Pillars PASS (scripts/verify_final.py)
+Final Evaluator Demo:      23 / 23 Steps PASS (backend/demo_final_verification.py)
+Phase 11 Status:           COMPLETE (Production Security & Scalability Verified)
 ```
 
 ---

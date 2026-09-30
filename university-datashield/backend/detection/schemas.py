@@ -1,6 +1,6 @@
 """
 University DataShield – Detection Engine
-Phase 2: schemas.py
+Phase 2 & Phase 9: schemas.py
 
 Pydantic models for the /scan API request and response.
 No real personal data is ever required — all sample_pattern values
@@ -24,6 +24,10 @@ Classification = Literal[
 ]
 
 ConfidenceBand = Literal["HIGH", "MEDIUM", "LOW", "NONE"]
+ConfidenceLevel = Literal["HIGH", "MEDIUM", "LOW", "REVIEW"]
+AmbiguityStatus = Literal["CLEAR", "REVIEW"]
+RiskLevel = Literal["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+PublicationReadiness = Literal["READY", "NEEDS_PROTECTION", "BLOCKED"]
 
 
 def confidence_band(score: int) -> ConfidenceBand:
@@ -68,6 +72,7 @@ class SignalBreakdown(BaseModel):
     pattern_match: bool = False
     data_type_match: bool = False
     semantic_match: bool = False
+    context_match: bool = False  # Phase 9: Cross-field context match
 
 
 class FieldResult(BaseModel):
@@ -80,6 +85,32 @@ class FieldResult(BaseModel):
     signals: SignalBreakdown
     reasons: list[str]
 
+    # Phase 9 Extensions (with backward-compatible defaults)
+    normalized_name: str | None = None
+    confidence_level: str | None = None
+    ambiguity_status: str | None = None
+    contextual_signals: list[str] = Field(default_factory=list)
+    recommendation: str | None = None
+
+
+class DatasetRiskSummary(BaseModel):
+    """Dataset-level synthetic risk summary (Phase 9)."""
+    risk_score: int = Field(ge=0, le=100)
+    risk_level: RiskLevel = "LOW"
+    publication_readiness: PublicationReadiness = "READY"
+    direct_identifiers_count: int = 0
+    quasi_identifiers_count: int = 0
+    sensitive_attributes_count: int = 0
+    academic_data_count: int = 0
+    placement_data_count: int = 0
+    non_sensitive_count: int = 0
+    review_fields_count: int = 0
+    risk_factors: list[str] = Field(default_factory=list)
+    disclaimer: str = (
+        "Synthetic prototype risk indicator based on heuristic schema composition. "
+        "Not a formal cryptographic or regulatory compliance audit."
+    )
+
 
 class ScanResponse(BaseModel):
     """Response body for POST /scan."""
@@ -88,3 +119,7 @@ class ScanResponse(BaseModel):
     fields_scanned: int
     sensitive_count: int
     results: list[FieldResult]
+
+    # Phase 9 Extensions:
+    dataset_risk: DatasetRiskSummary | None = None
+    publication_readiness: str | None = None

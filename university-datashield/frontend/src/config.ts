@@ -40,3 +40,22 @@ export const SECURITY_VALIDATION_METRICS_URL = `${API_BASE_URL}/security-validat
 /** Phase 8: Final Integration, Executive Summary & Demo Seeding */
 export const DASHBOARD_SUMMARY_URL = `${API_BASE_URL}/dashboard/summary`
 export const DEMO_RESET_URL = `${API_BASE_URL}/demo/reset`
+
+/** Phase 10: Analytical Pipeline Integration endpoints */
+export const PIPELINE_VALIDATE_URL = `${API_BASE_URL}/pipeline/validate`
+export const PIPELINE_PREVIEW_URL = `${API_BASE_URL}/pipeline/preview`
+export const PIPELINE_PUBLISH_URL = `${API_BASE_URL}/pipeline/publish`
+export const PIPELINE_BATCH_URL = `${API_BASE_URL}/pipeline/batch`
+export const PIPELINE_RUNS_URL = `${API_BASE_URL}/pipeline/runs`
+export const PIPELINE_REPORT_URL = (id: string) => `${API_BASE_URL}/pipeline/${id}/report`
+
+/** Phase 11: Production Security, Scalability, Worker Queue & Readiness */
+export const READY_URL = `${API_BASE_URL}/ready`
+export const AUTH_TOKEN_URL = `${API_BASE_URL}/auth/token`
+export const AUTH_ME_URL = `${API_BASE_URL}/auth/me`
+export const PIPELINE_JOBS_URL = `${API_BASE_URL}/pipeline/jobs`
+export const PIPELINE_JOBS_SUBMIT_URL = `${API_BASE_URL}/pipeline/jobs/submit`
+export const PIPELINE_WORKER_STATS_URL = `${API_BASE_URL}/pipeline/worker/stats`
+export const DESTINATION_PUBLISH_URL = `${API_BASE_URL}/pipeline/destination/publish`
+
+

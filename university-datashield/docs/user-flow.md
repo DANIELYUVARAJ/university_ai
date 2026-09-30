@@ -94,3 +94,34 @@ Evaluator opens Security Validation (/security-validation)
    - SEC-14: Self-Approval Attempt (BLOCK)
 ↓ Displays 100% Unsafe Publication Prevention and cryptographic chain verification
 ```
+
+---
+
+## 4. Analytical Pipeline Integration & Monitoring Flow (Phase 10)
+
+```text
+[1. Analytical Ingestion & Schema Extraction]
+   Data Engineer or automated pipeline submits raw synthetic CSV/JSON (/pipeline-monitor)
+   ↓ Pipeline service parses dataset in-memory; extracts schema and representative pattern samples
+   ↓ Raw records discarded immediately to enforce zero-retention data minimization
+
+[2. Multi-Signal Detection & Risk Assessment]
+   Phase 9 detection engine analyzes field names, value patterns, and contextual signals
+   ↓ Computes dataset-level risk score (0-100) and risk level (LOW/MEDIUM/HIGH/CRITICAL)
+
+[3. Masking Policy & Role Authorization Gate]
+   Evaluates actual transformations against active institutional policy v1.0
+   ↓ Checks requesting role authorization for production publishing
+   ↓ If unprotected or unauthorized: BLOCKED (fail-closed)
+   ↓ Automated preview displays required transformations (HASH, MASK, GENERALIZE)
+
+[4. Publication & Audit Ledger]
+   If compliant: pipeline transitions to READY
+   ↓ Upon publication execution, transitions to PUBLISHED
+   ↓ Appends SHA-256 chained event to tamper-evident audit ledger
+   ↓ Generates machine-readable JSON summary and Markdown verification report
+
+[5. Batch Analytical Processing]
+   Evaluator validates multi-dataset batch (e.g. admissions.csv + enrollment.json)
+   ↓ Fail-closed batch summary: if ANY dataset is blocked, overall batch is BLOCKED
+```

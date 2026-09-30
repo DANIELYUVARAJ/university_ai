@@ -1,6 +1,6 @@
 """
 University DataShield – Detection Engine
-Phase 2: rules.py
+Phase 2 & Phase 9: rules.py
 
 Field-name matching rules.
 
@@ -9,16 +9,18 @@ Design:
  - Each RuleEntry maps a set of name tokens/patterns to a classification
    and a base score contribution.
  - The matcher in detector.py applies these rules.
- - To extend: add entries to FIELD_NAME_RULES. No code changes needed.
-
-Edge-case handling baked into the rules:
- - "email_template_id" must NOT match as a personal email field.
+ - Edge-case handling baked into the rules:
+   * "email_template_id" must NOT match as a personal email field.
+   * "phone_model" must NOT match as a phone field.
+   * "salary_range_code" must NOT match as a salary field.
+   * "address_type", "contact_type" must NOT match as direct identifiers.
+   * "student_count", "course_code" must NOT match as sensitive.
    Achieved via an EXCLUSION token list per rule.
 """
 
 from __future__ import annotations
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -62,26 +64,32 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bstudent[_\-\s]?identifier\b",
             r"\bstudent[_\-\s]?number\b",
             r"\bstudent[_\-\s]?code\b",
+            r"\bstudent[_\-\s]?reference\b",
             r"\broll[_\-\s]?number\b",
             r"\broll[_\-\s]?no\b",
             r"\benrolment[_\-\s]?(no|number|id)?\b",
             r"\buniversity[_\-\s]?id\b",
             r"\bmatriculation\b",
+            r"\bcandidate[_\-\s]?(id|identifier|number|code|ref|reference)\b",
+            r"\bapplicant[_\-\s]?(id|number|code|ref)?\b",
         ),
-        exclusions=_p(),          # no exclusions needed
+        exclusions=_p(r"\bcount\b", r"\btemplate\b"),
         classification="DIRECT_IDENTIFIER",
         score=40,
-        reason="Field name indicates student identifier",
+        reason="Field name indicates student or candidate identifier",
     ),
 
     FieldNameRule(
         name_patterns=_p(
             r"\bemail[_\-\s]?address\b",
             r"\bpersonal[_\-\s]?email\b",
+            r"\bstudent[_\-\s]?email\b",
+            r"\bcontact[_\-\s]?email\b",
             r"\bemail\b",
+            r"\bmail[_\-\s]?id\b",
         ),
         # "email_template_id" → disqualified because 'template' appears
-        exclusions=_p(r"\btemplate\b", r"\btype\b", r"\bformat\b", r"\bconfig\b"),
+        exclusions=_p(r"\btemplate\b", r"\btype\b", r"\bformat\b", r"\bconfig\b", r"\bcount\b"),
         classification="DIRECT_IDENTIFIER",
         score=40,
         reason="Field name indicates email address",
@@ -95,8 +103,10 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bcell[_\-\s]?number\b",
             r"\btelephone\b",
             r"\bcontact[_\-\s]?number\b",
+            r"\bpersonal[_\-\s]?contact\b",
         ),
-        exclusions=_p(r"\btype\b", r"\bformat\b", r"\bprefix\b"),
+        # "phone_model" → disqualified because 'model' appears
+        exclusions=_p(r"\btype\b", r"\bformat\b", r"\bprefix\b", r"\bmodel\b", r"\bcount\b"),
         classification="DIRECT_IDENTIFIER",
         score=40,
         reason="Field name indicates phone / mobile number",
@@ -111,7 +121,14 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bsurname\b",
             r"\bname\b",
         ),
-        exclusions=_p(r"\bcourse\b", r"\bsubject\b", r"\binstitut\b", r"\bdepartment\b"),
+        exclusions=_p(
+            r"\bcourse\b",
+            r"\bsubject\b",
+            r"\binstitut\b",
+            r"\bdepartment\b",
+            r"\bcompany\b",
+            r"\btemplate\b",
+        ),
         classification="DIRECT_IDENTIFIER",
         score=35,
         reason="Field name indicates person name",
@@ -142,10 +159,10 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bzip[_\-\s]?code\b",
             r"\bpostal[_\-\s]?code\b",
         ),
-        exclusions=_p(r"\bip[_\-\s]?address\b", r"\burl\b", r"\bweb\b"),
+        exclusions=_p(r"\bip[_\-\s]?address\b", r"\burl\b", r"\bweb\b", r"\btype\b"),
         classification="DIRECT_IDENTIFIER",
         score=35,
-        reason="Field name indicates physical address",
+        reason="Field name indicates physical address / postal identifier",
     ),
 
     # ── QUASI IDENTIFIERS ───────────────────────────────────────────────────
@@ -158,11 +175,15 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bbirth[_\-\s]?year\b",
             r"\byear[_\-\s]?of[_\-\s]?birth\b",
             r"\bage\b",
+            r"\bgraduation[_\-\s]?year\b",
+            r"\bgrad[_\-\s]?year\b",
+            r"\bpassing[_\-\s]?year\b",
+            r"\bcompletion[_\-\s]?year\b",
         ),
-        exclusions=_p(r"\bcourse\b", r"\bpublication\b", r"\bfound(ed|ing)\b"),
+        exclusions=_p(r"\bcourse\b", r"\bpublication\b", r"\bfound(ed|ing)\b", r"\bcount\b"),
         classification="QUASI_IDENTIFIER",
         score=40,
-        reason="Field name indicates date of birth / age",
+        reason="Field name indicates date of birth / age / graduation cohort",
     ),
 
     FieldNameRule(
@@ -195,7 +216,7 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bpassport\b",
             r"\bdriving[_\-\s]?licen(c|s)e\b",
         ),
-        exclusions=_p(r"\bcourse\b", r"\bsystem\b"),
+        exclusions=_p(r"\bcourse\b", r"\bsystem\b", r"\brange[_\-\s]?code\b", r"\bcode\b"),
         classification="SENSITIVE_ATTRIBUTE",
         score=40,
         reason="Field name indicates sensitive financial / legal attribute",
@@ -206,11 +227,16 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
     FieldNameRule(
         name_patterns=_p(
             r"(?:^|[_\-\s])attendance(?:[_\-\s]|$)",
+            r"(?:^|[_\-\s])attendance[_\-\s]?percentage(?:[_\-\s]|$)",
+            r"(?:^|[_\-\s])absence[_\-\s]?count(?:[_\-\s]|$)",
+            r"(?:^|[_\-\s])absent[_\-\s]?days(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])grade(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])gpa(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])cgpa(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])sgpa(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])marks(?:[_\-\s]|$)",
+            r"(?:^|[_\-\s])internal[_\-\s]?mark(?:s)?(?:[_\-\s]|$)",
+            r"(?:^|[_\-\s])internal[_\-\s]?score(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])score(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])exam[_\-\s]?score(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])result(?:[_\-\s]|$)",
@@ -218,10 +244,10 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"(?:^|[_\-\s])credits?(?:[_\-\s]|$)",
             r"(?:^|[_\-\s])academic[_\-\s]?record(?:[_\-\s]|$)",
         ),
-        exclusions=_p(r"\bcompletion[_\-\s]?percentage\b"),  # could be non-academic
+        exclusions=_p(r"\bcompletion[_\-\s]?percentage\b"),
         classification="ACADEMIC_DATA",
         score=35,
-        reason="Field name indicates academic performance data",
+        reason="Field name indicates academic performance or attendance data",
     ),
 
     FieldNameRule(
@@ -235,11 +261,24 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bbranch\b",
             r"\bsemester\b",
             r"\bsection\b",
+            r"\bcourse[_\-\s]?count\b",
+            r"\bsemester[_\-\s]?count\b",
+            r"\bclassroom[_\-\s]?capacity\b",
+            r"\bacademic[_\-\s]?year\b",
+            r"\bcourse[_\-\s]?duration\b",
+            r"\bdepartment[_\-\s]?code\b",
+            r"\bstudent[_\-\s]?count\b",
+            r"\bcompany[_\-\s]?code\b",
+            r"\baddress[_\-\s]?type\b",
+            r"\bcontact[_\-\s]?type\b",
+            r"\bphone[_\-\s]?model\b",
+            r"\bsalary[_\-\s]?range[_\-\s]?code\b",
+            r"\bemail[_\-\s]?template[_\-\s]?(id|name)\b",
         ),
         exclusions=_p(),
         classification="NON_SENSITIVE",
-        score=15,
-        reason="Field name indicates course / department identifier",
+        score=20,
+        reason="Field name indicates institutional / curriculum structure or aggregate metric",
     ),
 
     # ── PLACEMENT DATA ──────────────────────────────────────────────────────
@@ -252,22 +291,23 @@ FIELD_NAME_RULES: list[FieldNameRule] = [
             r"\bpackage\b",
             r"\bctc\b",
             r"\boffer[_\-\s]?letter\b",
+            r"\boffer[_\-\s]?status\b",
             r"\bcompany[_\-\s]?name\b",
             r"\bemployer\b",
         ),
-        exclusions=_p(r"\bsoftware[_\-\s]?package\b"),
+        exclusions=_p(r"\bsoftware[_\-\s]?package\b", r"\bcompany[_\-\s]?code\b"),
         classification="PLACEMENT_DATA",
         score=35,
         reason="Field name indicates placement / employment data",
     ),
 
-    # ── CONTACT (ambiguous — low score, value pattern resolves) ─────────────
+    # ── CONTACT (ambiguous — low score, value pattern or context resolves) ──
 
     FieldNameRule(
         name_patterns=_p(r"\bcontact\b"),
-        exclusions=_p(r"\bnumber\b", r"\bphone\b", r"\bdetail\b"),
-        classification="NON_SENSITIVE",  # tentative; value pattern may upgrade
+        exclusions=_p(r"\bnumber\b", r"\bphone\b", r"\bdetail\b", r"\btype\b", r"\bemail\b"),
+        classification="NON_SENSITIVE",  # tentative; pattern or context upgrades
         score=10,
-        reason="Field name 'contact' is ambiguous — value pattern checked",
+        reason="Field name 'contact' is ambiguous — value pattern or context checked",
     ),
 ]

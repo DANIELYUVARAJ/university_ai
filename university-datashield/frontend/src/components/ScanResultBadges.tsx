@@ -36,26 +36,34 @@ export function ClassificationBadge({ cls }: { cls: Classification }) {
   )
 }
 
-export function ConfidenceBar({ score, band }: { score: number; band: ConfidenceBand }) {
+export function ConfidenceBar({ score, band, level }: { score: number; band: ConfidenceBand; level?: string }) {
   const cfg = BAND_CONFIG[band]
+  const isReview = level === 'REVIEW'
+
   return (
-    <div className="flex items-center gap-2 min-w-[120px]">
+    <div className="flex items-center gap-2 min-w-[130px]">
       <div className="flex-1 h-1.5 rounded-full bg-slate-700/60 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-all duration-500 ${cfg.bar}`}
+          className={`h-full rounded-full transition-all duration-500 ${isReview ? 'bg-amber-400' : cfg.bar}`}
           style={{ width: `${score}%` }}
         />
       </div>
-      <span className={`text-xs font-mono font-semibold w-7 text-right ${cfg.color}`}>
+      <span className={`text-xs font-mono font-semibold w-7 text-right ${isReview ? 'text-amber-400' : cfg.color}`}>
         {score}
       </span>
-      <span className={`badge text-[10px] border ${
-        band === 'HIGH'   ? 'bg-red-500/10 text-red-400 border-red-500/30'   :
-        band === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
-                            'bg-slate-700/40 text-slate-500 border-slate-600/30'
-      }`}>
-        {cfg.label}
-      </span>
+      {isReview ? (
+        <span className="badge text-[10px] border bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold">
+          REVIEW
+        </span>
+      ) : (
+        <span className={`badge text-[10px] border ${
+          band === 'HIGH'   ? 'bg-red-500/10 text-red-400 border-red-500/30'   :
+          band === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border-amber-500/30' :
+                              'bg-slate-700/40 text-slate-500 border-slate-600/30'
+        }`}>
+          {cfg.label}
+        </span>
+      )}
     </div>
   )
 }
@@ -66,14 +74,15 @@ export function SignalDots({ field }: { field: FieldResult }) {
     { key: 'pattern_match',    label: 'Pattern', active: field.signals.pattern_match },
     { key: 'data_type_match',  label: 'Type', active: field.signals.data_type_match },
     { key: 'semantic_match',   label: 'Semantic', active: field.signals.semantic_match },
+    { key: 'context_match',    label: 'Context', active: field.signals.context_match ?? false },
   ]
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1" title="Signals: Name | Pattern | Type | Semantic | Context">
       {signals.map(s => (
         <span
           key={s.key}
-          title={s.label}
-          className={`status-dot ${s.active ? 'bg-emerald-400' : 'bg-slate-700'}`}
+          title={`${s.label}: ${s.active ? 'Detected' : 'Inactive'}`}
+          className={`status-dot ${s.active ? (s.key === 'context_match' ? 'bg-cyan-400' : 'bg-emerald-400') : 'bg-slate-700'}`}
         />
       ))}
     </div>

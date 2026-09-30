@@ -54,3 +54,7 @@ htmlcov/
 
 # MyPy
 .mypy_cache/
+
+# SQLite runtime files
+*.db-shm
+*.db-wal

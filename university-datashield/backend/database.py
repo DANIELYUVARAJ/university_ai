@@ -217,6 +217,43 @@ async def init_db() -> None:
             """
         )
 
+        # -- Phase 10 tables -------------------------------------------------
+        # pipeline_runs: one row per pipeline execution validation.
+        # Zero raw PII retention: only stores metadata, schemas, summary metrics,
+        # decisions, and explainability reports.
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS pipeline_runs (
+                id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                pipeline_id        TEXT UNIQUE NOT NULL,
+                execution_id       TEXT NOT NULL,
+                dataset_name       TEXT NOT NULL,
+                format             TEXT NOT NULL,
+                status             TEXT NOT NULL,
+                risk_level         TEXT NOT NULL,
+                risk_score         INTEGER NOT NULL DEFAULT 0,
+                fields_count       INTEGER NOT NULL DEFAULT 0,
+                sensitive_count    INTEGER NOT NULL DEFAULT 0,
+                violations_count   INTEGER NOT NULL DEFAULT 0,
+                decision           TEXT NOT NULL,
+                role               TEXT NOT NULL,
+                policy_version     TEXT NOT NULL,
+                target_destination TEXT,
+                summary_json       TEXT NOT NULL,
+                report_markdown    TEXT,
+                audit_reference    TEXT,
+                created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+                completed_at       DATETIME
+            )
+            """
+        )
+
+        # Phase 11 indexes for production query scalability
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pipeline_runs_id ON pipeline_runs(pipeline_id);")
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pipeline_runs_status ON pipeline_runs(status);")
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_pipeline_runs_created ON pipeline_runs(created_at);")
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_audit_events_timestamp ON audit_events(timestamp);")
+
         await db.commit()
 
     logger.info("SQLite database initialised at %s", DB_PATH)

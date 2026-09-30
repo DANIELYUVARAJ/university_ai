@@ -50,5 +50,9 @@
   {"field_name": "student_count",        "data_type": "number",  "sample_pattern": "120",                   "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false},
   {"field_name": "salary_range_code",    "data_type": "string",  "sample_pattern": "RANGE_L3",              "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false},
   {"field_name": "address_type",         "data_type": "string",  "sample_pattern": "Permanent",             "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false},
-  {"field_name": "contact_type",         "data_type": "string",  "sample_pattern": "Primary",               "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false}
+  {"field_name": "contact_type",         "data_type": "string",  "sample_pattern": "Primary",               "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false},
+  {"field_name": "studentId",            "data_type": "string",  "sample_pattern": "STU_DEMO_555",          "expected_classification": "DIRECT_IDENTIFIER",   "expected_sensitive": true},
+  {"field_name": "birth-date",           "data_type": "date",    "sample_pattern": "2001-11-23",            "expected_classification": "QUASI_IDENTIFIER",    "expected_sensitive": true},
+  {"field_name": "course_syllabus_url",  "data_type": "string",  "sample_pattern": "https://univ.edu/cs101", "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false},
+  {"field_name": "department_budget_code","data_type": "string", "sample_pattern": "BUD_ENG_2026",          "expected_classification": "NON_SENSITIVE",        "expected_sensitive": false}
 ]

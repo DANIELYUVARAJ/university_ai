@@ -11,6 +11,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { path: '/',                  label: 'Dashboard',            icon: '◈', phase1Ready: true },
   { path: '/scanner',           label: 'Dataset Scanner',      icon: '⬡', phase1Ready: true },
+  { path: '/pipeline-monitor',  label: 'Pipeline Monitor',     icon: '⚡', phase1Ready: true },
   { path: '/policy-validator',  label: 'Policy Validator',     icon: '📋', phase1Ready: true },
   { path: '/publication-gate',  label: 'Publication Gate',     icon: '🚦', phase1Ready: true },
   { path: '/access-roles',      label: 'Access Roles',         icon: '👥', phase1Ready: true },
@@ -82,7 +83,7 @@ export default function Sidebar({ backendStatus }: SidebarProps) {
           </div>
           <span className="text-xs text-slate-400">{statusLabel}</span>
         </div>
-        <p className="mt-1 text-[10px] text-slate-600">Phase 8 · Evaluator Demonstration Ready</p>
+        <p className="mt-1 text-[10px] text-slate-600">Phase 11 · Production Hardened &amp; Security Gate Ready</p>
       </div>
     </aside>
   )

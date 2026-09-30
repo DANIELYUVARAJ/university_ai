@@ -228,5 +228,25 @@
     "field": "contact_type",
     "expected_sensitive": false,
     "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "studentId",
+    "expected_sensitive": true,
+    "expected_classification": "DIRECT_IDENTIFIER"
+  },
+  {
+    "field": "birth-date",
+    "expected_sensitive": true,
+    "expected_classification": "QUASI_IDENTIFIER"
+  },
+  {
+    "field": "course_syllabus_url",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
+  },
+  {
+    "field": "department_budget_code",
+    "expected_sensitive": false,
+    "expected_classification": "NON_SENSITIVE"
   }
 ]

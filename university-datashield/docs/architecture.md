@@ -63,8 +63,9 @@ flowchart TD
 | **Audit Ledger** | `backend/audit/` | Cryptographic SHA-256 hash chaining (`event_hash = SHA256(prev_hash + metadata)`), tamper detection |
 | **Policy Governance** | `backend/governance/` | Separation of duties (no self-approval), immutable policy snapshots, automated revalidation |
 | **Security Validation** | `backend/security_validation/` | 14 adversarial failure scenarios verifying default deny, bypass resistance, and cryptographic tamper alerts |
+| **Analytical Pipeline Service** | `backend/pipeline/` | Phase 10: Safe CSV/JSON ingestion, schema extraction, fail-closed pipeline gate, idempotency, batch validation |
 | **Demo & Executive Service** | `backend/demo/` | Live executive metrics aggregation, deterministic demo environment baseline reset |
-| **Frontend UI** | `frontend/src/` | React 19 + TypeScript + Vite + Tailwind, live system status, adversarial attack simulation panel |
+| **Frontend UI** | `frontend/src/` | React 19 + TypeScript + Vite + Tailwind, live system status, adversarial attack simulation panel, Pipeline Monitor |
 
 ---
 
@@ -81,7 +82,8 @@ SQLite Database (data/datashield.db)
 ├── publication_attempts   (Gate release verdicts and reasons)
 ├── audit_events           (SHA-256 chained immutable audit trail)
 ├── policy_versions        (Immutable snapshots of policy state)
-└── policy_change_requests (Proposed, reviewed, and approved changes)
+├── policy_change_requests (Proposed, reviewed, and approved changes)
+└── pipeline_runs          (Phase 10: Analytical pipeline validations, decisions & reports)
 ```
 
 ---

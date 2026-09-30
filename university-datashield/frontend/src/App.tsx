@@ -12,6 +12,7 @@ import PolicyVersions from './pages/PolicyVersions'
 import ChangeReview from './pages/ChangeReview'
 import SecurityValidation from './pages/SecurityValidation'
 import PrivacyByDesign from './pages/PrivacyByDesign'
+import PipelineMonitor from './pages/PipelineMonitor'
 import PlaceholderPage from './pages/PlaceholderPage'
 import { useHealth } from './hooks/useHealth'
 import type { DemoRole } from './types'
@@ -56,7 +57,7 @@ export default function App() {
                 🔬 Synthetic Data Only
               </span>
               <span className="badge bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
-                Phase 8
+                Phase 11
               </span>
             </div>
           </header>
@@ -66,6 +67,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/scanner" element={<DatasetScanner />} />
+              <Route path="/pipeline-monitor" element={<PipelineMonitor />} />
               <Route
                 path="/classification"
                 element={
