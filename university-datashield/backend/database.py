@@ -256,13 +256,24 @@ async def init_db() -> None:
 
         await db.commit()
 
+    # Automatically execute pending migrations to keep schema versioned and tracked
+    try:
+        try:
+            from migrations.runner import run_migrations
+        except ImportError:
+            from backend.migrations.runner import run_migrations
+        await run_migrations(str(DB_PATH))
+    except Exception as exc:
+        logger.warning("Auto-migration check notice: %s", exc)
+
     logger.info("SQLite database initialised at %s", DB_PATH)
 
 
 async def verify_db() -> dict:
     """
     Run a lightweight self-check and return status information.
-    Used by the /health endpoint.
+    Used by the /health and /ready endpoints.
+    Safe: Never exposes credentials.
     """
     try:
         async with aiosqlite.connect(str(DB_PATH)) as db:
@@ -271,7 +282,22 @@ async def verify_db() -> dict:
             )
             row = await cursor.fetchone()
             event_count = row[0] if row else 0
-        return {"ok": True, "path": str(DB_PATH), "event_count": event_count}
+
+        # Check migration status safely
+        try:
+            from migrations.runner import get_migration_status
+        except ImportError:
+            from backend.migrations.runner import get_migration_status
+        mig_status = await get_migration_status(str(DB_PATH))
+
+        return {
+            "ok": True,
+            "path": str(DB_PATH),
+            "event_count": event_count,
+            "migration_version": mig_status.get("latest_version"),
+            "migrations_up_to_date": mig_status.get("is_up_to_date", False)
+        }
     except Exception as exc:  # pragma: no cover
         logger.error("DB verify failed: %s", exc)
         return {"ok": False, "error": str(exc)}
+

@@ -1,0 +1,88 @@
+name: University DataShield CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-and-security:
+    name: Backend Tests, Security Hardening & Privacy Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-asyncio anyio httpx
+
+      - name: Run Privacy & Secret Audit
+        run: |
+          python scripts/privacy_audit.py
+
+      - name: Run Pytest Suite (Full Regression & Hardening)
+        run: |
+          pytest tests/ -v
+
+      - name: Run Database Backup & Restore Tests
+        run: |
+          pytest tests/test_phase12_backup_restore.py -v
+
+      - name: Run Production Security & Failure Recovery Tests
+        run: |
+          pytest tests/test_phase12_security_hardening.py tests/test_phase12_failure_recovery.py -v
+
+  frontend-build:
+    name: Frontend TypeScript Verification & Production Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "frontend/package-lock.json"
+
+      - name: Install Node Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run TypeScript Check & Vite Build
+        working-directory: frontend
+        run: npm run build
+
+  acceptance:
+    name: Final Acceptance Verification
+    needs: [backend-and-security, frontend-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+          pip install pytest pytest-asyncio anyio httpx
+
+      - name: Run Phase 12 Acceptance Suite
+        run: |
+          python scripts/verify_phase12.py

@@ -7,10 +7,10 @@ demonstrating pipeline-to-destination flow without external dependencies.
 """
 
 from typing import Dict, Any, List, Optional
-from backend.destinations.base import (
+from .base import (
     AnalyticsDestination,
     PublicationPayload,
-    DestinationResult
+    DestinationResult,
 )
 import logging
 
@@ -30,7 +30,35 @@ class MockWarehouseDestination(AnalyticsDestination):
         self.publication_history: List[Dict[str, Any]] = []
 
     def _write_records(self, payload: PublicationPayload) -> DestinationResult:
+        # Mandatory defense-in-depth gate check
+        if payload.decision != "ALLOW":
+            return DestinationResult(
+                success=False,
+                destination_type=self.name,
+                destination_target=payload.destination_target or payload.dataset_name,
+                records_written=0,
+                execution_time_ms=0.0,
+                message=f"Destination gate violation: decision '{payload.decision}' is not ALLOW.",
+                error=f"FAIL_CLOSED: Non-ALLOW decision '{payload.decision}' rejected by mock warehouse.",
+            )
+
         table_name = payload.destination_target or payload.dataset_name
+
+        # Idempotency check: if run_id has already been written, do not create duplicate records
+        if any(h.get("run_id") == payload.run_id for h in self.publication_history):
+            logger.info(
+                f"[MOCK_WAREHOUSE] Duplicate publication detected for run_id '{payload.run_id}'. "
+                f"Skipping re-insertion (idempotent write)."
+            )
+            return DestinationResult(
+                success=True,
+                destination_type=self.name,
+                destination_target=table_name,
+                records_written=0,
+                execution_time_ms=0.0,
+                message=f"Duplicate retry ignored for run '{payload.run_id}': Records already committed to '{table_name}'.",
+                audit_ref=payload.audit_hash,
+            )
 
         if table_name not in self.tables:
             self.tables[table_name] = []

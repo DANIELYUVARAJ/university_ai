@@ -58,3 +58,5 @@ htmlcov/
 # SQLite runtime files
 *.db-shm
 *.db-wal
+data/backups/
+*.bak

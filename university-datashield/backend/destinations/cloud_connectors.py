@@ -15,10 +15,10 @@ IMPORTANT:
 from typing import Dict, Any, Optional
 import os
 import logging
-from backend.destinations.base import (
+from .base import (
     AnalyticsDestination,
     PublicationPayload,
-    DestinationResult
+    DestinationResult,
 )
 
 logger = logging.getLogger("datashield.destinations.cloud")

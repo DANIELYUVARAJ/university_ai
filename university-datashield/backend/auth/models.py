@@ -5,7 +5,7 @@ Data models and schemas for Phase 11 Enterprise Authentication & Identity.
 
 from __future__ import annotations
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 
 from access.roles import Role
@@ -14,6 +14,19 @@ from access.roles import Role
 class AuthMode(str, Enum):
     DEMO = "DEMO"
     OIDC_JWT = "OIDC_JWT"
+
+
+class UserIdentity(BaseModel):
+    """
+    Phase 12 Production Identity Model.
+    Strict privacy: Only minimal security tokens and entitlements are retained.
+    """
+    subject_id: str = Field(..., description="Subject identifier (unique UUID or synthetic identifier)")
+    issuer: str = Field(..., description="Identity Provider (IdP) issuer URI")
+    roles: List[str] = Field(default_factory=list, description="Assigned role names")
+    permissions: List[str] = Field(default_factory=list, description="Resolved granular permissions")
+    authentication_method: str = Field("OIDC_JWT", description="Authentication method (OIDC_JWT, DEMO_LOCAL)")
+    is_active: bool = Field(True, description="Identity active status (revocation support)")
 
 
 class TokenPayload(BaseModel):
@@ -34,6 +47,8 @@ class AuthenticatedUser(BaseModel):
     name: Optional[str] = None
     auth_mode: AuthMode
     is_authenticated: bool = True
+    identity: Optional[UserIdentity] = None
+
 
 
 class TokenRequest(BaseModel):

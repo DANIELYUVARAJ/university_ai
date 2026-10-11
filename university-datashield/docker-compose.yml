@@ -76,6 +76,30 @@ services:
     depends_on:
       - backend
 
+  # ---------------------------------------------------------------------------
+  # Production PostgreSQL Database Service (Multi-instance enterprise mode)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: datashield-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: datashield
+      POSTGRES_USER: datashield_app
+      POSTGRES_PASSWORD: datashield_production_secure_pass_change_me
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U datashield_app -d datashield"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   datashield-data:
     driver: local
+  postgres-data:
+    driver: local
+

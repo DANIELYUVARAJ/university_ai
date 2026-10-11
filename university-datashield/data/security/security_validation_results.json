@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-29T10:30:01.925790Z",
+  "timestamp": "2026-10-11T14:03:39.304356Z",
   "overall_status": "PASS",
   "scenarios_passed": 14,
   "scenarios_total": 14,
@@ -60,7 +60,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION",
       "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
-      "execution_time_ms": 20.87
+      "execution_time_ms": 19.96
     },
     {
       "scenario_id": "SEC-02",
@@ -90,7 +90,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 10.82
+      "execution_time_ms": 19.78
     },
     {
       "scenario_id": "SEC-03",
@@ -114,7 +114,7 @@
       "remediation": null,
       "audit_event": "ACCESS_DENIAL",
       "notes": "Gate evaluated status: UNAUTHORIZED",
-      "execution_time_ms": 9.93
+      "execution_time_ms": 18.84
     },
     {
       "scenario_id": "SEC-04",
@@ -138,7 +138,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 10.28
+      "execution_time_ms": 24.34
     },
     {
       "scenario_id": "SEC-05",
@@ -162,7 +162,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 14.29
+      "execution_time_ms": 23.88
     },
     {
       "scenario_id": "SEC-06",
@@ -186,7 +186,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 12.49
+      "execution_time_ms": 22.35
     },
     {
       "scenario_id": "SEC-07",
@@ -210,7 +210,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 8.76
+      "execution_time_ms": 34.75
     },
     {
       "scenario_id": "SEC-08",
@@ -246,7 +246,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION",
       "notes": "Gate evaluated status: SAFE_TO_PUBLISH",
-      "execution_time_ms": 11.41
+      "execution_time_ms": 57.23
     },
     {
       "scenario_id": "SEC-09",
@@ -262,8 +262,8 @@
       "root_cause": null,
       "remediation": null,
       "audit_event": "AUDIT_INTEGRITY",
-      "notes": "Integrity engine caught tampering: Hash mismatch at event #3215: computed bc691e2755325f1e9fd488bee1c467bfd06f14ca3eb5e90eb1e618e8de2d8839, recorded 0000000000000000000000000000000000000000000000000000000000000000",
-      "execution_time_ms": 60.95
+      "notes": "Integrity engine caught tampering: Hash mismatch at event #5920: computed 739858aac79c0c7d2d0cc541b51d6a9f5102c44a1c21431541cf67eb971d2319, recorded 0000000000000000000000000000000000000000000000000000000000000000",
+      "execution_time_ms": 174.66
     },
     {
       "scenario_id": "SEC-10",
@@ -279,8 +279,8 @@
       "root_cause": null,
       "remediation": null,
       "audit_event": "POLICY_ROLLBACK",
-      "notes": "Active version restored to v1.6-rollback matching v1.4-rollback.",
-      "execution_time_ms": 120.15
+      "notes": "Active version restored to v1.10-rollback matching v1.8-rollback.",
+      "execution_time_ms": 158.61
     },
     {
       "scenario_id": "SEC-11",
@@ -304,7 +304,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 17.88
+      "execution_time_ms": 20.69
     },
     {
       "scenario_id": "SEC-12",
@@ -328,7 +328,7 @@
       "remediation": null,
       "audit_event": "PUBLICATION_CHECK",
       "notes": "Gate evaluated status: PUBLICATION_BLOCKED",
-      "execution_time_ms": 10.83
+      "execution_time_ms": 18.64
     },
     {
       "scenario_id": "SEC-13",
@@ -345,7 +345,7 @@
       "remediation": null,
       "audit_event": "ACCESS_DENIAL",
       "notes": "Backend rejected unauthorized rollback with 403 GOVERNANCE_ROLE_REQUIRED",
-      "execution_time_ms": 0.03
+      "execution_time_ms": 0.05
     },
     {
       "scenario_id": "SEC-14",
@@ -362,7 +362,7 @@
       "remediation": null,
       "audit_event": "POLICY_CHANGE_PROPOSED",
       "notes": "Backend rejected self-approval with 409 SELF_APPROVAL_BLOCKED",
-      "execution_time_ms": 40.66
+      "execution_time_ms": 48.47
     }
   ],
   "baseline_comparison": [

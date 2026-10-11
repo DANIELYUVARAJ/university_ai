@@ -13,6 +13,8 @@ import ChangeReview from './pages/ChangeReview'
 import SecurityValidation from './pages/SecurityValidation'
 import PrivacyByDesign from './pages/PrivacyByDesign'
 import PipelineMonitor from './pages/PipelineMonitor'
+import OperationalHealth from './pages/OperationalHealth'
+import Assistant from './pages/Assistant'
 import PlaceholderPage from './pages/PlaceholderPage'
 import { useHealth } from './hooks/useHealth'
 import type { DemoRole } from './types'
@@ -57,10 +59,11 @@ export default function App() {
                 🔬 Synthetic Data Only
               </span>
               <span className="badge bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold">
-                Phase 11
+                Phase 12
               </span>
             </div>
           </header>
+
 
           {/* Page routes */}
           <main className="flex-1 overflow-y-auto p-6 md:p-8">
@@ -86,8 +89,10 @@ export default function App() {
               <Route path="/policy-versions" element={<PolicyVersions currentRole={currentRole} />} />
               <Route path="/change-review" element={<ChangeReview currentRole={currentRole} />} />
               <Route path="/metrics" element={<Metrics />} />
+              <Route path="/operational-health" element={<OperationalHealth />} />
               <Route path="/security-validation" element={<SecurityValidation currentRole={currentRole} />} />
               <Route path="/privacy" element={<PrivacyByDesign />} />
+              <Route path="/assistant" element={<Assistant />} />
             </Routes>
           </main>
         </div>
@@ -95,3 +100,4 @@ export default function App() {
     </BrowserRouter>
   )
 }
+

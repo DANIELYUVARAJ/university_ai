@@ -3,24 +3,27 @@ University DataShield - Destination Connectors
 Phase 11: Production Security & Scalability
 """
 
-from backend.destinations.base import (
+from .base import (
     AnalyticsDestination,
     PublicationPayload,
-    DestinationResult
+    DestinationResult,
 )
-from backend.destinations.mock_warehouse import MockWarehouseDestination
-from backend.destinations.cloud_connectors import (
+from .mock_warehouse import MockWarehouseDestination
+from .cloud_connectors import (
     SnowflakeDestination,
     BigQueryDestination,
-    DatabricksDestination
+    DatabricksDestination,
 )
+from .postgres_destination import PostgresDestination
 
 __all__ = [
     "AnalyticsDestination",
     "PublicationPayload",
     "DestinationResult",
     "MockWarehouseDestination",
+    "PostgresDestination",
     "SnowflakeDestination",
     "BigQueryDestination",
     "DatabricksDestination",
 ]
+

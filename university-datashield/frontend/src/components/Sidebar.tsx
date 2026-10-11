@@ -19,9 +19,12 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/policy-versions',   label: 'Policy Versions',      icon: '◫', phase1Ready: true },
   { path: '/change-review',     label: 'Change Review',        icon: '⚖', phase1Ready: true },
   { path: '/metrics',           label: 'Evaluation & Metrics', icon: '📊', phase1Ready: true },
+  { path: '/operational-health', label: 'Operations & Health', icon: '📡', phase1Ready: true },
   { path: '/security-validation', label: 'Security Validation', icon: '🛡️', phase1Ready: true },
   { path: '/privacy',           label: 'Privacy by Design',    icon: '🔐', phase1Ready: true },
+  { path: '/assistant',         label: 'AI Assistant (LLM)',   icon: '🤖', phase1Ready: true },
 ]
+
 
 interface SidebarProps {
   backendStatus: BackendStatus
@@ -83,8 +86,9 @@ export default function Sidebar({ backendStatus }: SidebarProps) {
           </div>
           <span className="text-xs text-slate-400">{statusLabel}</span>
         </div>
-        <p className="mt-1 text-[10px] text-slate-600">Phase 11 · Production Hardened &amp; Security Gate Ready</p>
+        <p className="mt-1 text-[10px] text-slate-600">Phase 12 · Production Enterprise Ready &amp; Project Closure</p>
       </div>
     </aside>
   )
 }
+

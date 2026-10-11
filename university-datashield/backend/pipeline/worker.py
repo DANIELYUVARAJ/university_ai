@@ -66,6 +66,13 @@ class PipelineQueue:
 
     async def submit_job(self, request: PipelineValidateRequest) -> PipelineJob:
         """Submit a new analytical dataset validation job to the queue."""
+        # Idempotency check: if request has execution_id and is already active/completed
+        if request.execution_id:
+            for existing_job in self._jobs.values():
+                if existing_job.execution_id == request.execution_id and existing_job.state not in (JobState.FAILED, JobState.CANCELLED):
+                    logger.info("Idempotent submit: Job with execution_id '%s' already exists (%s).", request.execution_id, existing_job.job_id)
+                    return existing_job
+
         job_id = f"JOB-{uuid.uuid4().hex[:8].upper()}"
         pipeline_id = request.pipeline_id or generate_pipeline_id()
         execution_id = request.execution_id or generate_execution_id()
@@ -112,22 +119,18 @@ class PipelineQueue:
         if not job:
             raise ValueError(f"Job '{job_id}' not found.")
 
-        if job.state == JobState.BLOCKED:
-            # Re-enqueue: backend validation will execute again and evaluate security rules
-            job.retry_count += 1
-            job.state = JobState.QUEUED
-            await self._get_queue().put(job_id)
-            return job
-
-        if job.state == JobState.FAILED:
+        if job.state in (JobState.BLOCKED, JobState.FAILED):
             if job.retry_count >= job.max_retries:
-                raise ValueError(f"Job '{job_id}' has exceeded maximum retry limit of {job.max_retries}.")
+                job.state = JobState.DEAD_LETTERED
+                job.completed_at = datetime.utcnow().isoformat() + "Z"
+                raise ValueError(f"Job '{job_id}' has exceeded maximum retry limit of {job.max_retries} and is now DEAD_LETTERED.")
             job.retry_count += 1
             job.state = JobState.QUEUED
             await self._get_queue().put(job_id)
             return job
 
         raise ValueError(f"Job '{job_id}' is in state '{job.state.value}' and cannot be retried.")
+
 
     def get_stats(self) -> Dict[str, Any]:
         """Return real-time queue health and worker status metrics."""

@@ -36,8 +36,22 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none';"
+        # Content Security Policy: strictly scoped for docs endpoints, strict default for application routes
+        path = request.url.path
+        if path in ("/docs", "/docs/", "/redoc", "/redoc/"):
+            nonce = getattr(request.state, "csp_nonce", None)
+            nonce_clause = f" 'nonce-{nonce}'" if nonce else ""
+            response.headers["Content-Security-Policy"] = (
+                f"default-src 'self'; "
+                f"script-src 'self'{nonce_clause} https://cdn.jsdelivr.net; "
+                f"style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+                f"font-src 'self' https://fonts.gstatic.com; "
+                f"img-src 'self' data: https://cdn.jsdelivr.net; "
+                f"connect-src 'self'; "
+                f"frame-ancestors 'none';"
+            )
+        else:
+            response.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none';"
         response.headers["X-DataShield-Environment"] = settings.ENVIRONMENT
 
         # Safe structured logging without personal data
@@ -51,7 +65,23 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 duration_ms,
             )
 
+        # Record operational metrics
+        try:
+            try:
+                from observability.metrics import metrics_collector
+            except ImportError:
+                from backend.observability.metrics import metrics_collector
+            metrics_collector.record_request(
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                duration_ms=duration_ms,
+            )
+        except Exception:
+            pass
+
         return response
+
 
 
 class PayloadSizeLimiterMiddleware(BaseHTTPMiddleware):

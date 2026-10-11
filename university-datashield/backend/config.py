@@ -82,6 +82,13 @@ class Settings:
     # ── Audit Integrity ───────────────────────────────────────────────────────
     AUDIT_CHAIN_STRICT: bool = os.getenv("AUDIT_CHAIN_STRICT", "true").lower() in ("true", "1", "yes")
 
+    # ── Phase 13: Local LLM Assistant (Ollama) ───────────────────────────────
+    LLM_ASSISTANT_ENABLED: bool = os.getenv("LLM_ASSISTANT_ENABLED", "true").lower() in ("true", "1", "yes")
+    OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.2")
+    OLLAMA_TIMEOUT_SECONDS: float = float(os.getenv("OLLAMA_TIMEOUT_SECONDS", "45.0"))
+    LLM_MAX_PROMPT_CHARS: int = int(os.getenv("LLM_MAX_PROMPT_CHARS", "2000"))
+
     @classmethod
     def validate_production(cls) -> None:
         """

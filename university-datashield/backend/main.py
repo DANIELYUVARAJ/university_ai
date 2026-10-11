@@ -19,10 +19,21 @@ from __future__ import annotations
 import json
 import logging
 import sys
+from pathlib import Path
+
+# Ensure backend root directory is in sys.path when invoked as `backend.main:app`
+_backend_dir = str(Path(__file__).resolve().parent)
+if _backend_dir not in sys.path:
+    sys.path.insert(0, _backend_dir)
+
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
+import secrets
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db, verify_db, get_db
@@ -153,7 +164,14 @@ app = FastAPI(
     ),
     version="0.11.0",
     lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
 )
+
+# Static assets for documentation and UI icons
+_static_dir = Path(__file__).resolve().parent / "static"
+if _static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")
 
 # Phase 11 Security Middlewares
 app.add_middleware(PayloadSizeLimiterMiddleware)
@@ -174,6 +192,54 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+SWAGGER_FAVICON = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z'/></svg>"
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html(request: Request) -> HTMLResponse:
+    """
+    Renders Swagger UI with cryptographic CSP nonce injection and local static assets.
+    """
+    nonce = secrets.token_urlsafe(16)
+    request.state.csp_nonce = nonce
+
+    static_swagger = Path(__file__).resolve().parent / "static" / "swagger-ui"
+    if (static_swagger / "swagger-ui-bundle.js").exists() and (static_swagger / "swagger-ui.css").exists():
+        swagger_js_url = "/static/swagger-ui/swagger-ui-bundle.js"
+        swagger_css_url = "/static/swagger-ui/swagger-ui.css"
+    else:
+        swagger_js_url = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"
+        swagger_css_url = "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css"
+
+    resp = get_swagger_ui_html(
+        openapi_url="/openapi.json",
+        title="University DataShield API – Documentation",
+        swagger_js_url=swagger_js_url,
+        swagger_css_url=swagger_css_url,
+        swagger_favicon_url=SWAGGER_FAVICON,
+    )
+    body = resp.body.decode("utf-8")
+    body = body.replace("<script>", f'<script nonce="{nonce}">', 1)
+    return HTMLResponse(content=body, status_code=200)
+
+
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_html(request: Request) -> HTMLResponse:
+    """
+    Renders ReDoc documentation with cryptographic CSP nonce injection.
+    """
+    nonce = secrets.token_urlsafe(16)
+    request.state.csp_nonce = nonce
+
+    resp = get_redoc_html(
+        openapi_url="/openapi.json",
+        title="University DataShield API – ReDoc",
+        redoc_favicon_url=SWAGGER_FAVICON,
+    )
+    body = resp.body.decode("utf-8")
+    body = body.replace("<script>", f'<script nonce="{nonce}">', 1)
+    return HTMLResponse(content=body, status_code=200)
 
 # ---------------------------------------------------------------------------
 # Routes – Phase 1
@@ -219,16 +285,37 @@ async def ready() -> dict:
     db_ok = bool(db_status.get("ok"))
     audit_ok = True  # Audit chain service ready
     worker_ok = pipeline_queue.is_running
+    mig_ok = bool(db_status.get("migrations_up_to_date", True))
 
-    is_ready = db_ok and audit_ok and worker_ok
+    is_ready = db_ok and audit_ok and worker_ok and mig_ok
     return {
         "status": "ready" if is_ready else "not_ready",
         "database": "ok" if db_ok else "down",
+        "migrations": "ok" if mig_ok else "pending",
+        "migration_version": db_status.get("migration_version"),
         "pipeline": "ok" if worker_ok else "stopped",
         "audit": "ok" if audit_ok else "down",
         "auth_mode": "AUTHENTICATED_OIDC" if settings.AUTH_ENABLED else "DEMO_ROLE_SWITCHER",
         "environment": settings.ENVIRONMENT,
     }
+
+
+@app.get(
+    "/metrics/operational",
+    summary="Real-time operational and security telemetry",
+    tags=["observability"],
+    response_description="Live counts for requests, latencies, pipelines, publications, violations, and worker status",
+)
+@app.get("/api/metrics/operational", tags=["observability"])
+async def get_operational_metrics() -> dict:
+    """Return aggregated, privacy-safe production metrics and queue depths."""
+    try:
+        from observability.metrics import metrics_collector
+    except ImportError:
+        from backend.observability.metrics import metrics_collector
+    return metrics_collector.get_summary()
+
+
 
 
 # ---------------------------------------------------------------------------
@@ -654,7 +741,17 @@ async def publish_dataset(request: PublishExecutionRequest) -> PublishExecutionR
     except Exception as audit_exc:
         logger.warning("Failed to record publication audit event: %s", audit_exc)
 
+    try:
+        try:
+            from observability.metrics import metrics_collector
+        except ImportError:
+            from backend.observability.metrics import metrics_collector
+        metrics_collector.record_publication(response.decision.value, response.success)
+    except Exception:
+        pass
+
     return response
+
 
 
 # ---------------------------------------------------------------------------
@@ -915,7 +1012,17 @@ async def reset_demo_state() -> DemoResetResponse:
     response_model=PipelineValidateResponse,
 )
 async def validate_pipeline(request: PipelineValidateRequest) -> PipelineValidateResponse:
-    return await PipelineService.validate_pipeline(request)
+    resp = await PipelineService.validate_pipeline(request)
+    try:
+        try:
+            from observability.metrics import metrics_collector
+        except ImportError:
+            from backend.observability.metrics import metrics_collector
+        metrics_collector.record_pipeline(resp.decision, resp.status.value, resp.violations_count)
+    except Exception:
+        pass
+    return resp
+
 
 
 @app.post(
@@ -1171,6 +1278,17 @@ async def publish_to_destination(
         raise HTTPException(status_code=400, detail=result.message)
 
     return result.model_dump()
+
+
+# ---------------------------------------------------------------------------
+# Phase 13: Local AI Assistant (Ollama) Endpoints
+# ---------------------------------------------------------------------------
+try:
+    from llm.router import router as assistant_router
+    app.include_router(assistant_router, prefix="/api")
+    app.include_router(assistant_router)
+except Exception as _router_err:
+    logger.warning("Could not mount LLM assistant router: %s", _router_err)
 
 
 

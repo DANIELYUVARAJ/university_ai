@@ -57,5 +57,9 @@ export const PIPELINE_JOBS_URL = `${API_BASE_URL}/pipeline/jobs`
 export const PIPELINE_JOBS_SUBMIT_URL = `${API_BASE_URL}/pipeline/jobs/submit`
 export const PIPELINE_WORKER_STATS_URL = `${API_BASE_URL}/pipeline/worker/stats`
 export const DESTINATION_PUBLISH_URL = `${API_BASE_URL}/pipeline/destination/publish`
+export const OPERATIONAL_METRICS_URL = `${API_BASE_URL}/metrics/operational`
 
-
+/** Phase 13: DataShield AI Assistant */
+export const ASSISTANT_STATUS_URL = `${API_BASE_URL}/api/assistant/status`
+export const ASSISTANT_ASK_URL = `${API_BASE_URL}/api/assistant/ask`
+export const ASSISTANT_EXPLAIN_SCAN_URL = `${API_BASE_URL}/api/assistant/explain-scan`
